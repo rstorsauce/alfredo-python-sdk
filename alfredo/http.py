@@ -45,5 +45,3 @@ class HttpService(object):
 
     def delete(self, url, headers):
         return self._session.delete(url, headers=headers)
-
-
