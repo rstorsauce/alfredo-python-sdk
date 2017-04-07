@@ -50,10 +50,10 @@ class HttpPropertyResource(HttpResource):
     def __getattr__(self, child_path):
         if child_path in self.value:
             return self.value[child_path]
-        elif (":%s" % child_path) in self.children:
-            return HttpMethodResource(self, child_path, self.children[(":%s" % child_path)])
-        elif child_path in self.children:
-            return HttpPropertyResource(self, child_path, self.children[child_path])
+        elif (":%s" % child_path) in self._children:
+            return HttpMethodResource(self, child_path, self._children[(":%s" % child_path)])
+        elif child_path in self._children:
+            return HttpPropertyResource(self, child_path, self._children[child_path])
         else:
             try:
                 return self.value.__getattr__(child_path)
@@ -66,13 +66,13 @@ class HttpMethodResource(HttpPropertyResource):
         super(HttpMethodResource, self).__init__(parent, path, children)
 
     def __call__(self, path):
-        self.path = str(path)
+        self._path = str(path)
         return self
 
 
 class HttpResponse(HttpPropertyResource):
     def __init__(self, resource, status, reason, result):
-        super(HttpResponse, self).__init__(resource.parent, resource.path, resource.children)
+        super(HttpResponse, self).__init__(resource._parent, resource._path, resource._children)
         self._status = status
         self._reason = reason
         self._result = result
@@ -108,7 +108,7 @@ class HttpSingleResponse(HttpResponse):
             try:
                 self._result = http_response.json()
             except ValueError:
-                self._result = {'detail': 'Unknown error'}
+                self._result = {'detail': 'Server error'}
                 self._ok = False
 
 
@@ -141,8 +141,8 @@ class HttpIterableResponse(HttpResponse):
                 if current_next == self.value['next']:
                     raise IndexError("The index (%d) is out of range." % key)
 
-            if ':id' in self.children and 'id' in self.items[key]:
-                return HttpResponse(HttpPropertyResource(self, self.items[key]['id'], self.children[':id']),
+            if ':id' in self._children and 'id' in self.items[key]:
+                return HttpResponse(HttpPropertyResource(self, self.items[key]['id'], self._children[':id']),
                                     200, 'Partial content', self.items[key])
             else:
                 return HttpResponse(self, 206, 'Partial content', self.items[key])
