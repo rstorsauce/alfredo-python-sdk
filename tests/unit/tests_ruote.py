@@ -7,7 +7,7 @@ import alfredo
 
 class AlfredoSDKTest(TestCase):
     def setUp(self):
-        self.email = "%x@example.com" % (uuid.uuid4(),)
+        self.email = "%s@example.com" % (uuid.uuid4().hex,)
         self.password = 'password'
 
     def test_can_do_a_complete_flow(self):
