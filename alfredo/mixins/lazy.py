@@ -17,5 +17,16 @@ class LazyMixin(object):
     def __repr__(self):
         return repr(self.value)
 
+    def __bool__(self):
+        return self.value.__bool__()
+
+    __nonzero__ = __bool__
+
     def __len__(self):
         return len(self.value)
+
+    def __getattr__(self, item):
+        try:
+            return self.value.__getattr__(item)
+        except AttributeError:
+            return self.value.__getattribute__(item)

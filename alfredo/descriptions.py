@@ -14,6 +14,7 @@ ruote = {
         ':id': {}
     },
     'files': {
+        '__attrs_files': ['file'],
         ':id': {}
     },
     'jobs': {

@@ -19,17 +19,28 @@ class HttpResource(NestedMixin, LazyMixin):
             self.root.http_service = HttpService()
         return self.root.http_service
 
+    def prepare_field(self, key, value):
+        if "__attrs_files" in self._children and key in self.attrs_files and isinstance(value, str):
+            return open(value, 'rb')
+        return value
+
+    def prepare_input(self, **kwargs):
+        return {key: self.prepare_field(key, value) for (key, value) in kwargs.items()}
+
     def retrieve(self):
         return self.parse_response(self.http.get(self.full_path, self.root.headers))
 
     def create(self, **kwargs):
-        return self.parse_response(self.http.post(self.full_path, self.root.headers, **kwargs))
+        input_data = self.prepare_input(**kwargs)
+        return self.parse_response(self.http.post(self.full_path, self.root.headers, **input_data))
 
     def replace(self, **kwargs):
-        return self.parse_response(self.http.put(self.full_path, self.root.headers, **kwargs))
+        input_data = self.prepare_input(**kwargs)
+        return self.parse_response(self.http.put(self.full_path, self.root.headers, **input_data))
 
     def update(self, **kwargs):
-        return self.parse_response(self.http.patch(self.full_path, self.root.headers, **kwargs))
+        input_data = self.prepare_input(**kwargs)
+        return self.parse_response(self.http.patch(self.full_path, self.root.headers, **input_data))
 
     def delete(self):
         return self.parse_response(self.http.delete(self.full_path, self.root.headers))
@@ -48,17 +59,14 @@ class HttpPropertyResource(HttpResource):
         super(HttpPropertyResource, self).__init__(parent, path, children)
 
     def __getattr__(self, child_path):
-        if child_path in self.value:
-            return self.value[child_path]
-        elif (":%s" % child_path) in self._children:
+        if ("__%s" % child_path) in self._children:
+            return self._children[("__%s" % child_path)]
+        if (":%s" % child_path) in self._children:
             return HttpMethodResource(self, child_path, self._children[(":%s" % child_path)])
         elif child_path in self._children:
             return HttpPropertyResource(self, child_path, self._children[child_path])
         else:
-            try:
-                return self.value.__getattr__(child_path)
-            except AttributeError:
-                raise AttributeError('%r object has no attribute %r' % (self.value.__class__.__name__, child_path))
+            return super(HttpPropertyResource, self).__getattr__(child_path)
 
 
 class HttpMethodResource(HttpPropertyResource):
@@ -86,18 +94,32 @@ class HttpResponse(HttpPropertyResource):
     def ok(self):
         return self._ok and self._status < 400
 
-    def retrieve(self):
-        return self._result
+    @property
+    def exit_code(self):
+        return 0 if self.ok else self.status / 100
 
     def __str__(self):
-        return yaml.dump(self.value, default_flow_style=False).rstrip('\n')
+        return yaml.dump(self._result, default_flow_style=False).rstrip('\n')
 
     def __repr__(self):
         return "\n%d - %s\n\n%s\n" % (self._status, self._reason, self)
 
     def __getitem__(self, item):
-        key = list(self.value.keys())[item]
-        return key, self.value[key]
+        key = list(self._result.keys())[item]
+        return key, self._result.__getitem__(key)
+
+    def __getattr__(self, item):
+        if item not in self._result:
+            raise AttributeError('%r object has no attribute %r' % (self.__class__.__name__, item))
+        return self._result[item]
+
+    def native(self):
+        return self._result
+
+    def __bool__(self):
+        return True
+
+    __nonzero__ = __bool__
 
 
 class HttpSingleResponse(HttpResponse):
@@ -117,15 +139,28 @@ class HttpIterableResponse(HttpResponse):
         super(HttpIterableResponse, self).__init__(resource, http_response.status_code, http_response.reason,
                                                    http_response.json())
 
+    def native(self):
+        return [item.native() for item in self]
+
+    def __bool__(self):
+        return len(self) > 0
+
+    __nonzero__ = __bool__
+
     def __len__(self):
-        return self.value['count']
+        return self._result['count']
+
+    def __repr__(self):
+        return "\n%d - %s\n\n%d items\n" % (self._status, self._reason, len(self))
 
     def __str__(self):
-        return "items: %d" % (len(self),)
+        if len(self) == 0:
+            return yaml.dump([], default_flow_style=False).rstrip('\n')
+        return "".join(yaml.dump([item._result], default_flow_style=False) for item in self).rstrip('\n')
 
     @property
     def items(self):
-        return self.value['results']
+        return self._result['results']
 
     def __getitem__(self, key):
         if isinstance(key, slice):
@@ -136,9 +171,9 @@ class HttpIterableResponse(HttpResponse):
             if key < 0 or key >= len(self):
                 raise IndexError("The index (%d) is out of range." % key)
             while key >= len(self.items):
-                current_next = self.value['next']
+                current_next = self._result['next']
                 self.get_next_page()
-                if current_next == self.value['next']:
+                if current_next == self._result['next']:
                     raise IndexError("The index (%d) is out of range." % key)
 
             if ':id' in self._children and 'id' in self.items[key]:
@@ -150,7 +185,7 @@ class HttpIterableResponse(HttpResponse):
             raise TypeError('invalid argument')
 
     def get_next_page(self):
-        if self.value['next']:
-            next_page_value = self.http.get(self.value['next'], self.root.headers).json()
-            self.value['results'].extend(next_page_value['results'])
-            self.value['next'] = next_page_value['next']
+        if self._result['next']:
+            next_page_value = self.http.get(self._result['next'], self.root.headers).json()
+            self._result['results'].extend(next_page_value['results'])
+            self._result['next'] = next_page_value['next']

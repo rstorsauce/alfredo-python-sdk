@@ -5,7 +5,7 @@ from unittest.case import TestCase
 import alfredo
 
 
-class AlfredoTest(TestCase):
+class AlfredoSDKTest(TestCase):
     def setUp(self):
         self.email = "%x@example.com" % (uuid.uuid4(),)
         self.password = 'password'
@@ -22,8 +22,13 @@ class AlfredoTest(TestCase):
         self.assertIsNotNone(ruote.jobs.create.__call__)
 
         me = ruote.users.me
+        self.assertTrue(bool(me))
+        self.assertTrue(me.ok)
         self.assertEqual(me.email, self.email)
         self.assertEqual(me.id, user_created.id)
+
+        with self.assertRaises(AttributeError):
+            print(me.missing_attribute)
 
         changed_name = me.update(first_name='Bob')
         self.assertEqual(changed_name.first_name, "Bob")
@@ -36,7 +41,7 @@ class AlfredoTest(TestCase):
         self.assertEqual(user.email, self.email)
 
         cluster_created = ruote.clusters.create(name=uuid.uuid4())
-        self.assertIn(cluster_created.id, [cluster.id for cluster in ruote.clusters])
+        self.assertIn(cluster_created.id, (cluster.id for cluster in ruote.clusters))
 
         queue_q = ruote.queues.create(cluster=cluster_created.id, name='q')
         self.assertEqual(queue_q.cluster, cluster_created.id)
@@ -48,6 +53,7 @@ class AlfredoTest(TestCase):
             f.delete()
 
         files = ruote.files
+        self.assertFalse(bool(files))
         self.assertEqual(len(files), 0)
 
         file_created = ruote.files.create(name=uuid.uuid4(), file=open(__file__, 'rb'))
@@ -59,6 +65,7 @@ class AlfredoTest(TestCase):
         self.assertRegexpMatches(file_tried.detail, 'already.*uploaded')
 
         files = ruote.files
+        self.assertTrue(bool(files))
         self.assertEqual(len(files), 1)
 
         for f in ruote.files:
