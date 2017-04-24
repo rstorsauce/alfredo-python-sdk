@@ -5,7 +5,7 @@
 Usage:
     alfredo login [-i <input>]
     alfredo logout
-    alfredo ruote [-C|-R|-U|-D] [-i <input>] [-o <output>] <path>...
+    alfredo ruote [-C|-R|-U|-D|-X] [-i <input>] [-o <output>] <path>...
 
 Options:
 
@@ -13,6 +13,7 @@ Options:
 
         -C  --create    Create.
         -R  --retrieve  Retrieve (default operation).
+        -X  --replace   Replace.
         -U  --update    Update.
         -D  --delete    Delete.
 
@@ -192,6 +193,8 @@ class RuoteCommand(Command):
             response = target.create(**self.input)
         elif self._arguments['-U']:
             response = target.update(**self.input)
+        elif self._arguments['-X']:
+            response = target.replace(**self.input)
         elif self._arguments['-D']:
             response = target.delete()
         else:
@@ -225,12 +228,14 @@ class RuoteCommand(Command):
 
     def print_output_attrs(self, response):
         result = response.native()
-        output = self._arguments['--output'].split('.')
-        for attr_list_str in output:
-            result = self.pluck(result, attr_list=attr_list_str.split(','))
+        attr_list = self._arguments['--output'].split(',')
+        result = self.pluck(result, attr_list=attr_list)
         print(yaml.dump(result, default_flow_style=False).rstrip('\n'))
 
     def pluck(self, dict_or_list, attr_list):
+        if not attr_list:
+            return dict_or_list
+
         if isinstance(dict_or_list, list):
             return self.pluck_list(dict_or_list, attr_list)
         else:
@@ -244,9 +249,17 @@ class RuoteCommand(Command):
 
     def pluck_dict(self, target_dict, attr_list):
         if len(attr_list) == 1:
-            return target_dict[attr_list[0]]
+            return self.pluck_dict_dot(target_dict, attr_list[0].split('.'))
+        elif len(attr_list) > 1:
+            return {key.strip(): self.pluck(target_dict, [key]) for key in attr_list if key != ''}
+
+    def pluck_dict_dot(self, target_dict, attr_dot_list):
+        if len(attr_dot_list) > 1:
+            return self.pluck_dict_dot(target_dict[attr_dot_list[0].strip()], attr_dot_list[1:])
+        elif len(attr_dot_list) == 1:
+            return target_dict[attr_dot_list[0].strip()]
         else:
-            return {key.strip(): target_dict[key.strip()] for key in attr_list if key != ''}
+            return target_dict
 
 
 class CLI(object):
