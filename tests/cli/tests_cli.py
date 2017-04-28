@@ -13,7 +13,7 @@ class AlfredoCLITest(TestCase):
 
     @staticmethod
     def sh(*args):
-        full_command = ["python", "./cli.py"] + [str(arg) for arg in args]
+        full_command = ["alfredo"] + [str(arg) for arg in args]
         process = subprocess.Popen(full_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = process.communicate()
         exit_code = process.poll()

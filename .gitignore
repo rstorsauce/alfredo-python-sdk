@@ -6,4 +6,6 @@
 .virtualenv3
 .v2
 .v3
-
+build/
+dist/
+alfredo_python.egg-info/

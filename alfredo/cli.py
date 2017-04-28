@@ -295,6 +295,9 @@ class CLI(object):
             pass
 
 
-if __name__ == '__main__':
+def main():
     sys.excepthook = CLI.cleanup
     CLI.run(__doc__, __version__)
+
+if __name__ == '__main__':
+    main()
