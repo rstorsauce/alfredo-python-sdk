@@ -276,7 +276,8 @@ class CLI(object):
         for command_name in CLI.commands.keys():
             if arguments[command_name]:
                 exit_code = CLI.commands[command_name](arguments).run()
-                CLI.cleanup()
+                if sys.argv[0] == 'alfredo':
+                    CLI.cleanup()
                 exit(exit_code)
 
     @staticmethod

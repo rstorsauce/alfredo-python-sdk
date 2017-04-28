@@ -1,9 +1,16 @@
-import subprocess
+import sys
 import uuid
 from os.path import basename
 from unittest.case import TestCase
 
 import ruamel.yaml as yaml
+
+from alfredo import cli
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 class AlfredoCLITest(TestCase):
@@ -11,14 +18,42 @@ class AlfredoCLITest(TestCase):
         self.email = "%s@example.com" % (uuid.uuid4().hex,)
         self.password = 'password'
 
-    @staticmethod
-    def sh(*args):
-        full_command = ["alfredo"] + [str(arg) for arg in args]
-        process = subprocess.Popen(full_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        stdout, stderr = process.communicate()
-        exit_code = process.poll()
+    @classmethod
+    def fake_exit(cls, exit_code):
+        cls.exit_code = exit_code
+
+    def mock_std_streams(self):
+        self.sys_stdout_backup = sys.stdout
+        self.sys_stderr_backup = sys.stderr
+
+        sys.stdout = StringIO()
+        sys.stderr = StringIO()
+
+    def restore_std_streams(self):
+        sys.stdout.close()
+        sys.stderr.close()
+
+        sys.stdout = self.sys_stdout_backup
+        sys.stderr = self.sys_stderr_backup
+
+    def sh(self, *args):
+        self.mock_std_streams()
+
+        try:
+            sys.argv = ['test-alfredo'] + [str(arg) for arg in args]
+            cli.main()
+            exit_code = 0
+        except SystemExit as e:
+            exit_code = int(e.code)
+
+        stdout = sys.stdout.getvalue()
+        stderr = sys.stderr.getvalue()
+
+        self.restore_std_streams()
+
         if exit_code != 0:
-            raise RuntimeError("%dxx - %s" % (exit_code, stdout,))
+            raise RuntimeError("%d\n%s\n%s" % (exit_code, stdout, stderr))
+
         return yaml.safe_load(stdout)
 
     def test_can_do_a_complete_flow(self):
@@ -30,8 +65,7 @@ class AlfredoCLITest(TestCase):
         user_created = self.sh("ruote", "users", "-C", "-i", repr({"email": self.email, "password": self.password}))
         self.assertIsInstance(user_created['id'], int)
 
-        token = self.sh("ruote", "sso", "token_by_email", "-C", "-i",
-                        repr({"email": self.email, "password": self.password}))["token"]
+        token = self.sh("ruote", "sso", "token_by_email", "-C", "-i", repr({"email": self.email, "password": self.password}))["token"]
         self.assertEqual(len(token), 40)
 
         self.sh("login", "-i", repr({"email": self.email, "password": self.password}))
@@ -72,5 +106,6 @@ class AlfredoCLITest(TestCase):
         for f in self.sh("ruote", "files"):
             self.sh("ruote", "files", "id:{}".format(f['id']), "-D")
 
-        app_created = self.sh("ruote", "apps", "-C", "-i", repr({"name": 'app', "container_checksum": '000', "container_url": 'http://app/'}))
+        app_created = self.sh("ruote", "apps", "-C", "-i",
+                              repr({"name": 'app', "container_checksum": '000', "container_url": 'http://app/'}))
         self.assertIsInstance(app_created['id'], int)
