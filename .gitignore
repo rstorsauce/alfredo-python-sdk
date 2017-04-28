@@ -1,6 +1,9 @@
 *.pyc
 .idea
 .token
+.coverage
 .virtualenv
 .virtualenv3
+.v2
+.v3
 
