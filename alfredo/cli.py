@@ -121,8 +121,6 @@ def represent_unicode(self, data):
 if sys.version_info < (3,):
     yaml.representer.Representer.add_representer(unicode, represent_unicode)
 
-__version__ = '0.0.1'
-
 
 class Command(object):
     def __init__(self, arguments):
@@ -298,7 +296,7 @@ class CLI(object):
 
 def main():
     sys.excepthook = CLI.cleanup
-    CLI.run(__doc__, __version__)
+    CLI.run(__doc__, alfredo.__version__)
 
 if __name__ == '__main__':
     main()
