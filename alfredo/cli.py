@@ -166,7 +166,8 @@ class LoginCommand(Command):
             with open(self.token_file, 'w') as f:
                 f.write(response.token)
         else:
-            print(response)
+            sys.stdout.write(response)
+            sys.stdout.flush()
         return response.exit_code
 
 
@@ -222,13 +223,15 @@ class RuoteCommand(Command):
         if self._arguments['--output']:
             self.print_output_attrs(response)
         else:
-            print(response)
+            sys.stdout.write(str(response))
+            sys.stdout.flush()
 
     def print_output_attrs(self, response):
         result = response.native()
         attr_list = self._arguments['--output'].split(',')
         result = self.pluck(result, attr_list=attr_list)
-        print(yaml.dump(result, default_flow_style=False).rstrip('\n'))
+        sys.stdout.write(yaml.dump(result, default_flow_style=False))
+        sys.stdout.flush()
 
     def pluck(self, dict_or_list, attr_list):
         if not attr_list:

@@ -40,7 +40,7 @@ class AlfredoCLITest(TestCase):
         self.mock_std_streams()
 
         try:
-            sys.argv = ['test-alfredo'] + [str(arg) for arg in args]
+            sys.argv = ['alfredo-test'] + [str(arg) for arg in args]
             cli.main()
             exit_code = 0
         except SystemExit as e:

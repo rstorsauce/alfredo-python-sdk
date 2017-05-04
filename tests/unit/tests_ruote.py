@@ -18,7 +18,7 @@ class AlfredoSDKTest(TestCase):
         self.assertEqual(len(token), 40)
 
         ruote = alfredo.ruote(token)
-        self.assertSetEqual(set(dict(ruote).keys()), {'files', 'jobs', 'users', 'queues', 'apps', 'clusters'})
+        self.assertGreaterEqual(set(dict(ruote).keys()), {'files', 'jobs', 'users', 'queues', 'apps', 'clusters'})
         self.assertIsNotNone(ruote.jobs.create.__call__)
 
         me = ruote.users.me

@@ -99,10 +99,10 @@ class HttpResponse(HttpPropertyResource):
         return 0 if self.ok else self.status / 100
 
     def __str__(self):
-        return yaml.dump(self._result, default_flow_style=False).rstrip('\n')
+        return yaml.dump(self._result, default_flow_style=False)
 
     def __repr__(self):
-        return "\n%d - %s\n\n%s\n" % (self._status, self._reason, self)
+        return "\n%d - %s\n\n%s" % (self._status, self._reason, self)
 
     def __getitem__(self, item):
         key = list(self._result.keys())[item]
@@ -155,8 +155,8 @@ class HttpIterableResponse(HttpResponse):
 
     def __str__(self):
         if len(self) == 0:
-            return yaml.dump([], default_flow_style=False).rstrip('\n')
-        return "".join(yaml.dump([item._result], default_flow_style=False) for item in self).rstrip('\n')
+            return yaml.dump([], default_flow_style=False)
+        return "".join(yaml.dump([item._result], default_flow_style=False) for item in self)
 
     @property
     def items(self):
