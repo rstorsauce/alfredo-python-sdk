@@ -18,7 +18,10 @@ ruote = {
         ':id': {}
     },
     'jobs': {
-        ':id': {}
+        ':id': {
+            'stdout': {},
+            'stderr': {}
+        }
     },
     'apps': {
         ':id': {}

@@ -6,6 +6,9 @@ from alfredo.mixins.nested import NestedMixin
 
 
 class HttpResource(NestedMixin, LazyMixin):
+    class Exception(Exception):
+        pass
+
     def __init__(self, parent, path, children):
         LazyMixin.__init__(self)
         NestedMixin.__init__(self, parent, path, children)
@@ -47,9 +50,18 @@ class HttpResource(NestedMixin, LazyMixin):
 
     def parse_response(self, http_response):
         if http_response.ok and http_response.status_code != 204:
-            response_body = http_response.json()
-            if 'results' in response_body and 'count' in response_body:
-                return HttpIterableResponse(self, http_response)
+            content_type = http_response.headers['content-type']
+
+            if content_type == 'application/json':
+                response_body = http_response.json()
+                if 'results' in response_body and 'count' in response_body:
+                    return HttpIterableResponse(self, http_response)
+
+            elif content_type == 'text/plain':
+                return HttpTextPlainResponse(self, http_response)
+
+            else:
+                raise HttpResource.Exception("Unknown content-type {}".format(content_type))
 
         return HttpSingleResponse(self, http_response)
 
@@ -132,6 +144,15 @@ class HttpSingleResponse(HttpResponse):
             except ValueError:
                 self._result = {'detail': 'Server error'}
                 self._ok = False
+
+
+class HttpTextPlainResponse(HttpResponse):
+    def __init__(self, resource, http_response):
+        super(HttpTextPlainResponse, self).__init__(resource, http_response.status_code, http_response.reason,
+                                                    http_response.text)
+
+    def __str__(self):
+        return self._result
 
 
 class HttpIterableResponse(HttpResponse):
