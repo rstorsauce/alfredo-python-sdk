@@ -108,8 +108,10 @@ import os.path
 import re
 import sys
 
+import datetime
 import ruamel.yaml as yaml
 from docopt import docopt
+from ruamel.yaml.parser import ParserError
 
 import alfredo
 
@@ -142,18 +144,19 @@ class Command(object):
     @property
     def input(self):
         if self._arguments['--input']:
-            return self.input_from_argv()
+            return self.input_from(self._arguments['--input'])
         else:
-            return self.input_from_stdin()
+            if sys.stdin.isatty():
+                sys.stdout.write("Enter input:\n")
+            return self.input_from(sys.stdin.read())
 
-    def input_from_argv(self):
-        return yaml.safe_load(self._arguments['--input'])
-
-    def input_from_stdin(self):
-        if sys.stdin.isatty():
-            sys.stdout.write("Enter input:\n")
-
-        return yaml.safe_load(sys.stdin.read()) or {}
+    @staticmethod
+    def input_from(input_str):
+        try:
+            return yaml.safe_load(input_str) or {}
+        except ParserError as e:
+            sys.stderr.write("Parser error {0}\n".format(e))
+            raise SystemExit(1)
 
     def run(self):
         raise NotImplementedError()
@@ -276,10 +279,16 @@ class CLI(object):
 
         for command_name in CLI.commands.keys():
             if arguments[command_name]:
-                exit_code = CLI.commands[command_name](arguments).run()
-                if sys.argv[0] == 'alfredo':
-                    CLI.cleanup()
-                exit(exit_code)
+                try:
+                    exit_code = CLI.commands[command_name](arguments).run()
+                    if sys.argv[0].endswith('alfredo'):
+                        CLI.cleanup()
+                    exit(exit_code)
+                except Exception as e:
+                    with open('alfredo-errors.log', 'a') as f:
+                        f.write("ERROR {0}\n{1!r}\n{1!s}\n".format(datetime.datetime.utcnow(), e))
+                    sys.stderr.write("Unknown error\n")
+                    exit(1)
 
     @staticmethod
     def cleanup(*args):
