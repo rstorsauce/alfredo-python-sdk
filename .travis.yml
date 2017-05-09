@@ -22,5 +22,5 @@ deploy:
   distributions: bdist_wheel
   on:
     python: 2.7
-    repo: teamjamon/alfredo-python-sdk
+    repo: rstorcloud/alfredo-python-sdk
     branch: develop

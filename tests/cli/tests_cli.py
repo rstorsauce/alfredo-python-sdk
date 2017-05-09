@@ -75,8 +75,10 @@ class AlfredoCLITest(TestCase):
         self.assertEqual(me['id'], user_created['id'])
         self.assertNotIn('missing_attribute', me)
 
-        changed_name = self.sh("ruote", "users", "me", "-U", "-i", repr({"first_name": 'Bob'}))
-        self.assertEqual(changed_name['first_name'], "Bob")
+        first_name = 'Bob'
+        payload = yaml.safe_dump({"first_name": first_name})
+        changed_name = self.sh("ruote", "users", "me", "-U", "-i", payload)
+        self.assertEqual(changed_name['first_name'], first_name)
 
         user = self.sh("ruote", "users", "id:{}".format(me['id']))
         self.assertEqual(user['email'], self.email)

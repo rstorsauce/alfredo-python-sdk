@@ -192,16 +192,22 @@ class RuoteCommand(Command):
         target = self.get_target()
 
         if self._arguments['-C']:
+            sys.stderr.write("Uploading data...\r")
             response = target.create(**self.input)
         elif self._arguments['-U']:
+            sys.stderr.write("Uploading data...\r")
             response = target.update(**self.input)
         elif self._arguments['-X']:
+            sys.stderr.write("Uploading data...\r")
             response = target.replace(**self.input)
         elif self._arguments['-D']:
+            sys.stderr.write("Deleting data...\r")
             response = target.delete()
         else:
+            sys.stderr.write("Getting data...\r")
             response = target.retrieve()
 
+        sys.stderr.write("                              \r")
         return response
 
     def get_target(self):
@@ -287,7 +293,7 @@ class CLI(object):
                 except Exception as e:
                     with open('alfredo-errors.log', 'a') as f:
                         f.write("ERROR {0}\n{1!r}\n{1!s}\n".format(datetime.datetime.utcnow(), e))
-                    sys.stderr.write("Unknown error\n")
+                    sys.stderr.write("Unknown error              \n")
                     exit(1)
 
     @staticmethod
