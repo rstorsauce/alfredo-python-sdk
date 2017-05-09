@@ -5,7 +5,7 @@ import ruamel.yaml as yaml
 from alfredo import descriptions
 from alfredo.resource import HttpPropertyResource
 
-__version__ = '0.0.1.post6'
+__version__ = '0.0.1.post7'
 
 
 def represent_unicode(self, data):
@@ -21,3 +21,7 @@ def ruote(token=None):
     if token is not None:
         root.headers = dict(Authorization="Token %s" % token)
     return root
+
+
+def virgo():
+    return HttpPropertyResource(None, 'http://virgo.teamjamon.com', descriptions.virgo)

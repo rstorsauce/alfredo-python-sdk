@@ -6,6 +6,7 @@ Usage:
     alfredo login [-i <input>]
     alfredo logout
     alfredo ruote [-C|-R|-U|-D|-X] [-i <input>] [-o <output>] <path>...
+    alfredo virgo [-C|-R|-U|-D|-X] [-i <input>] [-o <output>] <path>...
 
 Options:
 
@@ -104,11 +105,11 @@ Options:
 
 """
 
+import datetime
 import os.path
 import re
 import sys
 
-import datetime
 import ruamel.yaml as yaml
 from docopt import docopt
 from ruamel.yaml.parser import ParserError
@@ -147,7 +148,7 @@ class Command(object):
             return self.input_from(self._arguments['--input'])
         else:
             if sys.stdin.isatty():
-                sys.stdout.write("Enter input:\n")
+                sys.stdout.write("Enter input:                \n")
             return self.input_from(sys.stdin.read())
 
     @staticmethod
@@ -182,7 +183,7 @@ class LogoutCommand(Command):
         return 1
 
 
-class RuoteCommand(Command):
+class AlfredoCommand(Command):
     def run(self):
         response = self.get_response()
         self.print_response(response)
@@ -211,8 +212,7 @@ class RuoteCommand(Command):
         return response
 
     def get_target(self):
-        ruote = alfredo.ruote(token=self.token)
-        target = ruote
+        target = self.get_initial_target()
         for p in self._arguments['<path>']:
             try:
                 call = re.search('([^:]+):(.+)', p)
@@ -272,11 +272,22 @@ class RuoteCommand(Command):
             return target_dict
 
 
+class RuoteCommand(AlfredoCommand):
+    def get_initial_target(self):
+        return alfredo.ruote(token=self.token)
+
+
+class VirgoCommand(AlfredoCommand):
+    def get_initial_target(self):
+        return alfredo.virgo()
+
+
 class CLI(object):
     commands = {
         'login': LoginCommand,
         'logout': LogoutCommand,
         'ruote': RuoteCommand,
+        'virgo': VirgoCommand,
     }
 
     @staticmethod
@@ -290,6 +301,10 @@ class CLI(object):
                     if sys.argv[0].endswith('alfredo'):
                         CLI.cleanup()
                     exit(exit_code)
+                except IOError as e:
+                    sys.stderr.write(str(e))
+                    sys.stderr.write('\n')
+                    exit(e.errno)
                 except Exception as e:
                     with open('alfredo-errors.log', 'a') as f:
                         f.write("ERROR {0}\n{1!r}\n{1!s}\n".format(datetime.datetime.utcnow(), e))

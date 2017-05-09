@@ -10,6 +10,9 @@ ruote = {
     'clusters': {
         ':id': {}
     },
+    'AWSclusters': {
+        ':id': {}
+    },
     'queues': {
         ':id': {}
     },
@@ -26,4 +29,12 @@ ruote = {
     'apps': {
         ':id': {}
     }
+}
+virgo = {
+    'build': {
+        '__attrs_files': ['file'],
+        ':id': {
+            'log': {},
+        },
+    },
 }
