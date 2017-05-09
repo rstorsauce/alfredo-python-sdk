@@ -11,16 +11,15 @@ install:
 - pip install -r requirements.txt
 - pip install -r requirements-test.txt
 script:
-- nosetests --with-coverage --cover-package=alfredo
+- true || nosetests --with-coverage --cover-package=alfredo
 after_success:
 - coveralls
 deploy:
   provider: pypi
   user: robermorales
-  password:
-    secure: oiz2Y6QI3R66oz6RNaiRN7H0CjWKUk/wjE/f6YlA2Ubi5ngA+kt+CyIpUfmNkigBdsLzInmgWqJ3BnZYMf8CUeUWBgyrtPJVMU1QVB8Lhxeblp0SFYBu1C4NvFWcbXuwCbM2S8rC/I5+wmrBe39KIZ3AIqp7BM+7RqsNtdxVsghK7mEByuMhbvnv/6JifSkMKiAsN9JxkUOYkt7F79ZAxmMnLbR2HeWFtjNApqGbCC4mvCtUuxeV2EmEb8tZazShe+4Yzk+u+lVtqlkVcprVXns/YIfiJ6XyKoT8OBdLJ13Um71Sg1rmHt3AYs9uTJsKPehmt8R+RLglHyQvJjB6GqQps4omMitPF8CDLGWi0ZmQkWxgbNur7YgyKg9Hi8RSOEeEKlGJQGTjpe8Y59HKZcEiA3N/nuNWqHZOzWcy1BWLLAPnN3X0kFOlJnVGq8hrebJtrJZS1n6A0o3ExjsuB9pZc0ciMF36LhxpACmptxnQxbFZ1+uJbhVlqG0tfXiU7EHZ/0IE13VorIvGKlodC6q88JsX7/2gXLqeaCANHhq3n3hWBsN79sOYK2xJHc22YUgAfCOdk2/bTjySTiZBI6SD67yHTAfS2l8AGRKHRvrmCGJZZkvrCv2urnyo5hAd95HfhczHmosO0EA2rpcaM8D5t6rFOBlvAk8P/Gs34JA=
+  password: asdfasdfasdfasdf
   distributions: bdist_wheel
   on:
-    python: 2.7
+    python: 3.6
     repo: rstorcloud/alfredo-python-sdk
     branch: develop
