@@ -170,7 +170,7 @@ class LoginCommand(Command):
             with open(self.token_file, 'w') as f:
                 f.write(response.token)
         else:
-            sys.stdout.write(response)
+            sys.stdout.write(str(response))
             sys.stdout.flush()
         return response.exit_code
 
@@ -193,19 +193,19 @@ class AlfredoCommand(Command):
         target = self.get_target()
 
         if self._arguments['-C']:
-            sys.stderr.write("Uploading data...\r")
+            sys.stderr.write("Creating...\r")
             response = target.create(**self.input)
         elif self._arguments['-U']:
-            sys.stderr.write("Uploading data...\r")
+            sys.stderr.write("Updating...\r")
             response = target.update(**self.input)
         elif self._arguments['-X']:
-            sys.stderr.write("Uploading data...\r")
+            sys.stderr.write("Replacing...\r")
             response = target.replace(**self.input)
         elif self._arguments['-D']:
-            sys.stderr.write("Deleting data...\r")
+            sys.stderr.write("Deleting...\r")
             response = target.delete()
         else:
-            sys.stderr.write("Getting data...\r")
+            sys.stderr.write("Retrieving...\r")
             response = target.retrieve()
 
         sys.stderr.write("                              \r")
@@ -224,7 +224,7 @@ class AlfredoCommand(Command):
                 else:
                     target = getattr(target, p)
             except AttributeError:
-                sys.stderr.write("Unknown path\n")
+                sys.stderr.write("Unknown path        \n")
                 exit(1)
         return target
 
@@ -306,7 +306,7 @@ class CLI(object):
                     sys.stderr.write('\n')
                     exit(e.errno)
                 except Exception as e:
-                    with open('alfredo-errors.log', 'a') as f:
+                    with open('.alfredo-errors.log', 'a') as f:
                         f.write("ERROR {0}\n{1!r}\n{1!s}\n".format(datetime.datetime.utcnow(), e))
                     sys.stderr.write("Unknown error              \n")
                     exit(1)
