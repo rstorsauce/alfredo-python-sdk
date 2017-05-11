@@ -29,7 +29,7 @@ class HttpService(object):
         return data, files
 
     def get(self, url, headers):
-        return self._session.get(url, headers=headers)
+        return self._session.get(url, headers=headers, stream=True)
 
     def post(self, url, headers, **kwargs):
         data, files = self.prepare_data_and_files(**kwargs)

@@ -5,7 +5,7 @@ import ruamel.yaml as yaml
 from alfredo import descriptions
 from alfredo.resource import HttpPropertyResource
 
-__version__ = '0.0.1.post8'
+__version__ = '0.0.1.post9'
 
 
 def represent_unicode(self, data):
@@ -18,7 +18,6 @@ if sys.version_info < (3,):
 
 def ruote(token=None):
     root = HttpPropertyResource(None, 'http://preapi.teamjamon.com', descriptions.ruote)
-    # root = HttpPropertyResource(None, 'http://localhost:8000', descriptions.ruote)
     if token is not None:
         root.headers = dict(Authorization="Token %s" % token)
     return root

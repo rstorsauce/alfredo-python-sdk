@@ -23,7 +23,8 @@ ruote = {
     'jobs': {
         ':id': {
             'stdout': {},
-            'stderr': {}
+            'stderr': {},
+            'log': {},
         }
     },
     'apps': {

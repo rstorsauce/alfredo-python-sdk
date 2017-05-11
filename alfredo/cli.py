@@ -229,7 +229,9 @@ class AlfredoCommand(Command):
         return target
 
     def print_response(self, response):
-        if self._arguments['--output']:
+        if hasattr(response, 'stream') and hasattr(response.stream, '__call__'):
+            response.stream(sys.stdout)
+        elif self._arguments['--output']:
             self.print_output_attrs(response)
         else:
             sys.stdout.write(str(response))

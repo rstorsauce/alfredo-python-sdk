@@ -17,7 +17,8 @@ after_success:
 deploy:
   provider: pypi
   user: robermorales
-  password: asdfasdfasdfasdf
+  password:
+    secure: ACg9L6rwjVFPQ9USRRwvd0NFQAy44SxoCYpCKUIXfDU1o0oJCpjHenbw3fwO81TOUlh3+r5G9vmy8thFT4N2Ag7EhOsWyh1m7w9kq0D+sDisqk5u/QQkkmqwp8QH38tDyDXDIO/1NsXJ5K03OedGs7PUHr6PMYujafcvahd5jm7YvroERyoDRxCMo7yEMqwVF+/aMxM/PF5J+OlNZhZvGIABOUKibUyoqDlpG92Zp/T5yeb8SY7jpvhqeht6bLFyd3E8cku1F/FpfwwyoMc4a4JXws8j6UeAFACQakMiJbxKlJm5TM8w/rlg6/1q9ZrnGY0gxgMxcuo/ZDNU64RkZCf4qS/X1/bg6DpFzYjYsAimsmqR5jJK7RqvNQyvVpy0h9Xh1EPwwn0QybtnkkSuHf1skI8CkrpojTsQf4tCBWoXMqSZHMLZu/45zCvMGS4Rury7WEPUTyWrM+kQrVQ5nfr9eWDKZ+8Y3azSfiEb47EBHlN8gV2uUjojl1UAjNCg2Ik1Qkdzza03v8p8wtiKnocjWXPd5HXSjZTjPrXZxrVa9NHLOIbSVQWwyV++RTAkHxlo81J47e1BjMxwG3GY+XMirt0MIUWK3ONK4cxez9mT2VMM/l8bm5OvZzKhiRiVwlfqahLzpKJWLKZcR6884J+9ZVudqz9dTWJbC6DePbg=
   distributions: bdist_wheel
   on:
     python: 3.6

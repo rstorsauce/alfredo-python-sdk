@@ -1,4 +1,6 @@
+import datetime
 import ruamel.yaml as yaml
+import sys
 
 from alfredo.http import HttpService
 from alfredo.mixins.lazy import LazyMixin
@@ -148,10 +150,31 @@ class HttpSingleResponse(HttpResponse):
 
 class HttpTextPlainResponse(HttpResponse):
     def __init__(self, resource, http_response):
-        super(HttpTextPlainResponse, self).__init__(resource, http_response.status_code, http_response.reason,
-                                                    http_response.text)
+        super(HttpTextPlainResponse, self).__init__(resource, http_response.status_code, http_response.reason, '')
+        self._http_response = http_response
+        self.truncated_warning = '\r[truncated content...]\n'
+
+    def stream(self, target=sys.stdout):
+        try:
+            for line in self._http_response.iter_lines(chunk_size=1):
+                target.write(line)
+                target.write('\n')
+        except KeyboardInterrupt:
+            target.write(self.truncated_warning)
 
     def __str__(self):
+        self._result = ''
+        number_of_lines = 0
+        old_line = None
+
+        for line in self._http_response.iter_lines(chunk_size=1):
+            number_of_lines += 1
+            if old_line:
+                self._result += old_line + '\n'
+                if number_of_lines == 5:
+                    return self._result + self.truncated_warning
+            old_line = line
+        self._result += old_line
         return self._result
 
 
