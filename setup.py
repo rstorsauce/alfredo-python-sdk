@@ -10,7 +10,7 @@ with open(os.path.join(ROOT, 'README.rst')) as file_obj:
     long_description = file_obj.read()
 
 setup(
-    name='alfredo-python',
+    name='alfredo-py',
     version=alfredo.__version__,
     description=long_description.splitlines()[0],
     long_description=long_description,
