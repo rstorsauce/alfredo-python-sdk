@@ -17,11 +17,11 @@ if sys.version_info < (3,):
 
 
 def ruote(token=None):
-    root = HttpPropertyResource(None, 'http://preapi.teamjamon.com', descriptions.ruote)
+    root = HttpPropertyResource(None, 'https://preapi.teamjamon.com', descriptions.ruote)
     if token is not None:
         root.headers = dict(Authorization="Token %s" % token)
     return root
 
 
 def virgo():
-    return HttpPropertyResource(None, 'http://virgo.teamjamon.com', descriptions.virgo)
+    return HttpPropertyResource(None, 'https://virgo.teamjamon.com', descriptions.virgo)
