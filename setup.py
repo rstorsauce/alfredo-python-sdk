@@ -15,10 +15,10 @@ setup(
     description=long_description.splitlines()[0],
     long_description=long_description,
     keywords='alfredo python sdk',
-    url='https://github.com/rstorcloud/alfredo-python-sdk',
+    url='https://github.com/rstorsauce/alfredo-python-sdk',
     license='LGPL 2.1',
     author='RStor',
-    author_email='rober.morales@rstor.io',
+    author_email='christopher@rstor.io',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
         'requests',
