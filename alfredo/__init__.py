@@ -24,4 +24,4 @@ def ruote(token=None):
 
 
 def virgo():
-    return HttpPropertyResource(None, 'https://virgo.teamjamon.com', descriptions.virgo)
+    return HttpPropertyResource(None, 'http://virgo.teamjamon.com', descriptions.virgo)
