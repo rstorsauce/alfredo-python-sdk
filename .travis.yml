@@ -1,26 +1,26 @@
 language: python
 python:
-- 2.7
-- 3.3
-- 3.4
-- 3.5
-- 3.5-dev
-- 3.6
-- 3.6-dev
+- "2.7"
+- "3.3"
+- "3.4"
+- "3.5"
+- "3.6"
 install:
 - pip install -r requirements.txt
 - pip install -r requirements-test.txt
+env:
+- RUOTE_ROOT=https://preapi.teamjamon.com
 script:
-- true || nosetests --with-coverage --cover-package=alfredo
+- nosetests --with-coverage --cover-package=alfredo --stop
 after_success:
 - coveralls
 deploy:
   provider: pypi
   user: robermorales
   password:
-    secure: ACg9L6rwjVFPQ9USRRwvd0NFQAy44SxoCYpCKUIXfDU1o0oJCpjHenbw3fwO81TOUlh3+r5G9vmy8thFT4N2Ag7EhOsWyh1m7w9kq0D+sDisqk5u/QQkkmqwp8QH38tDyDXDIO/1NsXJ5K03OedGs7PUHr6PMYujafcvahd5jm7YvroERyoDRxCMo7yEMqwVF+/aMxM/PF5J+OlNZhZvGIABOUKibUyoqDlpG92Zp/T5yeb8SY7jpvhqeht6bLFyd3E8cku1F/FpfwwyoMc4a4JXws8j6UeAFACQakMiJbxKlJm5TM8w/rlg6/1q9ZrnGY0gxgMxcuo/ZDNU64RkZCf4qS/X1/bg6DpFzYjYsAimsmqR5jJK7RqvNQyvVpy0h9Xh1EPwwn0QybtnkkSuHf1skI8CkrpojTsQf4tCBWoXMqSZHMLZu/45zCvMGS4Rury7WEPUTyWrM+kQrVQ5nfr9eWDKZ+8Y3azSfiEb47EBHlN8gV2uUjojl1UAjNCg2Ik1Qkdzza03v8p8wtiKnocjWXPd5HXSjZTjPrXZxrVa9NHLOIbSVQWwyV++RTAkHxlo81J47e1BjMxwG3GY+XMirt0MIUWK3ONK4cxez9mT2VMM/l8bm5OvZzKhiRiVwlfqahLzpKJWLKZcR6884J+9ZVudqz9dTWJbC6DePbg=
+    secure: OovDKTJraZdQRqCmqFM3O03emqxsXeIs9o5m8ttC+fhDCXSEDmQNO/XepXCunPG778JhfQCy9wRO3qbXAOj9kZu2uELouA9P5SuLwOHjb83vk6bcppyH9XzWOOe8IUkx7/LoSDRDIYJovSGcqmdR9wnk0AQ0sQEM0oSoxzKsvvNqKkF+QuOEz+UerZupYZdxWZpTTEaBJO9lket8JsDuNE67UQwlBBOfRTxit8pezQ8vWHHYGa+y0/npGRGaoH3aOEZT2erLNoR2th4YQfB+RwApdTyut5RDeJB9FZSzzO2qIhEH6nEfYTkNYDPvy1PhKZSoYmlFuS7dv+WPfH7BQNEenc3TLV4078vYUy8foHsf+O+8byYUBExWIxqpeF4aaz1+dkpm5Cv1S2Ljz59xui/wnlJxvgXx7eb6ieRlRNJkT3WKrQ2CUL8EiRiWHyx8M7ZyDRECsO6c4t23fzm+JDhj2D6hFq3Fvc3Nm1am0jfd+Mn+muLEZIq1OhmablflRfFOEfYdvwYFGRp5spvI4DVGONiz2MPfE5ojAO2TB2NqYG+0+I+BoP1X5lZHNT8yNBey01ipTJ7YTmFJIX5AALzEFTcfD+mY+YwryATVAC2mBN/Ym/64xyiUZT7AXT009FdGF+BG9vE7CfkffZN/wi+u1+kILm/CVPJLGJSMxD0=
   distributions: bdist_wheel
   on:
     python: 3.6
-    repo: rstorcloud/alfredo-python-sdk
+    repo: rstorsauce/alfredo-python-sdk
     branch: develop

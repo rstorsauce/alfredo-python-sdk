@@ -1,12 +1,12 @@
 import sys
 
+import os
 import ruamel.yaml as yaml
 
 from alfredo import descriptions
 from alfredo.resource import HttpPropertyResource
 
-__version__ = '0.0.1.post9'
-
+__version__ = '0.0.2.post1'
 
 def represent_unicode(self, data):
     return self.represent_str(data.encode('utf-8'))
@@ -17,11 +17,12 @@ if sys.version_info < (3,):
 
 
 def ruote(token=None):
-    root = HttpPropertyResource(None, 'https://api.teamjamon.com', descriptions.ruote)
+    ruote_root = os.getenv('RUOTE_ROOT', 'https://api.teamjamon.com')
+    root = HttpPropertyResource(None, ruote_root, descriptions.ruote)
     if token is not None:
         root.headers = dict(Authorization="Token %s" % token)
     return root
 
-
 def virgo():
-    return HttpPropertyResource(None, 'http://virgo.teamjamon.com', descriptions.virgo)
+    virgo_root = os.getenv('VIRGO_ROOT', 'http://virgo.teamjamon.com')
+    return HttpPropertyResource(None, virgo_root, descriptions.virgo)

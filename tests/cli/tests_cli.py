@@ -16,7 +16,7 @@ except ImportError:
 class AlfredoCLITest(TestCase):
     def setUp(self):
         self.email = "%s@example.com" % (uuid.uuid4().hex,)
-        self.password = 'password'
+        self.password = 'pass!@#$%964'
 
     @classmethod
     def fake_exit(cls, exit_code):
@@ -109,5 +109,5 @@ class AlfredoCLITest(TestCase):
             self.sh("ruote", "files", "id:{}".format(f['id']), "-D")
 
         app_created = self.sh("ruote", "apps", "-C", "-i",
-                              repr({"name": 'app', "container_checksum": '000', "container_url": 'http://app/'}))
+                              repr({"name": 'app', "container_checksum": '000', "container_url": 'http://example.com/app'}))
         self.assertIsInstance(app_created['id'], int)

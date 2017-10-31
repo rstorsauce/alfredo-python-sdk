@@ -8,7 +8,7 @@ import alfredo
 class AlfredoSDKTest(TestCase):
     def setUp(self):
         self.email = "%s@example.com" % (uuid.uuid4().hex,)
-        self.password = 'password'
+        self.password = 'pass!@#$%964'
 
     def test_can_do_a_complete_flow(self):
         user_created = alfredo.ruote().users.create(email=self.email, password=self.password)
@@ -72,5 +72,5 @@ class AlfredoSDKTest(TestCase):
             file_deleted = f.delete()
             self.assertTrue(file_deleted.ok, file_deleted)
 
-        app_created = ruote.apps.create(name='app', container_checksum='000', container_url='http://app/')
+        app_created = ruote.apps.create(name='app', container_checksum='000', container_url='http://example.com/app')
         self.assertTrue(app_created.ok, app_created)
