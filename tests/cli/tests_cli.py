@@ -1,6 +1,7 @@
+import os
 import sys
+import tempfile
 import uuid
-from os.path import basename
 from unittest.case import TestCase
 
 import ruamel.yaml as yaml
@@ -15,8 +16,8 @@ except ImportError:
 
 class AlfredoCLITest(TestCase):
     def setUp(self):
-        self.email = "%s@example.com" % (uuid.uuid4().hex,)
-        self.password = 'pass!@#$%964'
+        self.email = os.environ['TEST_USER']
+        self.password = os.environ['TEST_PASSWORD']
 
     @classmethod
     def fake_exit(cls, exit_code):
@@ -62,20 +63,17 @@ class AlfredoCLITest(TestCase):
         except RuntimeError:
             pass
 
-        user_created = self.sh("ruote", "users", "-C", "-i", repr({"email": self.email, "password": self.password}))
-        self.assertIsInstance(user_created['id'], int)
-
-        token = self.sh("ruote", "sso", "token_by_email", "-C", "-i", repr({"email": self.email, "password": self.password}))["token"]
+        token = self.sh("ruote", "sso", "token_by_email", "-C", "-i",
+                        repr({"email": self.email, "password": self.password}))["token"]
         self.assertEqual(len(token), 40)
 
         self.sh("login", "-i", repr({"email": self.email, "password": self.password}))
 
         me = self.sh("ruote", "users", "me")
         self.assertEqual(me['email'], self.email)
-        self.assertEqual(me['id'], user_created['id'])
         self.assertNotIn('missing_attribute', me)
 
-        first_name = 'Bob'
+        first_name = 'Bob %s' % uuid.uuid4().hex[6:8]
         payload = yaml.safe_dump({"first_name": first_name})
         changed_name = self.sh("ruote", "users", "me", "-U", "-i", payload)
         self.assertEqual(changed_name['first_name'], first_name)
@@ -89,25 +87,16 @@ class AlfredoCLITest(TestCase):
         queue_q = self.sh("ruote", "queues", "-C", "-i", repr({"name": "q", "cluster": cluster_created['id']}))
         self.assertEqual(queue_q['cluster'], cluster_created['id'])
 
-        for f in self.sh("ruote", "files"):
-            self.sh("ruote", "files", "id:{}".format(f['id']), "-D")
+        uploaded_file = tempfile.NamedTemporaryFile()
 
-        files = self.sh("ruote", "files")
-        self.assertEqual(len(files), 0)
-
-        file_created = self.sh("ruote", "files", "-C", "-i", repr({'name': uuid.uuid4().hex, "file": __file__}))
+        file_created = self.sh("ruote", "files", "-C", "-i",
+                               repr({'name': uuid.uuid4().hex, "file": uploaded_file.name}))
         self.assertIsInstance(file_created['id'], int)
-        self.assertEqual(file_created['name'], basename(__file__))
+        self.assertEqual(file_created['name'], uploaded_file.name.split('/')[-1])
 
-        with self.assertRaisesRegexp(RuntimeError, 'already.*uploaded'):
-            self.sh("ruote", "files", "-C", "-i", repr({'name': uuid.uuid4().hex, "file": __file__}))
-
-        files = self.sh("ruote", "files")
-        self.assertEqual(len(files), 1)
-
-        for f in self.sh("ruote", "files"):
-            self.sh("ruote", "files", "id:{}".format(f['id']), "-D")
+        self.sh("ruote", "files", "id:{}".format(file_created['id']), "-D")
 
         app_created = self.sh("ruote", "apps", "-C", "-i",
-                              repr({"name": 'app', "container_checksum": '000', "container_url": 'http://example.com/app'}))
+                              repr({"name": 'app', "container_checksum": '000',
+                                    "container_url": 'http://example.com/app'}))
         self.assertIsInstance(app_created['id'], int)
