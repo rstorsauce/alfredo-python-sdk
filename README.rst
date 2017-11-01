@@ -125,3 +125,11 @@ Deployment
 ==========
 
 If you are trying to use travis as a pypi deployment tool, please note that there is no documented way of using passwords with special characters.
+
+Then you can try
+
+.. code-block:: bash
+
+   echo -n "password" | travis encrypt --org --add deploy.password --repo rstorsauce/alfredo-python-sdk
+
+and be sure that your pypi user is the same than the ``deploy.user`` and that you have permissions to deploy ``alfredo-python``.
