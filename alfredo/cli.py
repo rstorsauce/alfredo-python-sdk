@@ -147,10 +147,14 @@ class Command(object):
     def input(self):
         if self._arguments['--input']:
             return self.input_from(self._arguments['--input'])
-        else:
+
+        try:
             if sys.stdin.isatty():
                 sys.stdout.write("Enter input:                \n")
-            return self.input_from(sys.stdin.read())
+        except ValueError:
+            return {}
+
+        return self.input_from(sys.stdin.read())
 
     @staticmethod
     def input_from(input_str):
@@ -184,8 +188,8 @@ class LogoutCommand(Command):
     def run(self):
         if self.is_logged_in():
             os.remove(self.token_file)
-            return 0
-        return 1
+            return CLI.SUCCESS
+        return CLI.INPUT_ERROR
 
 
 class AlfredoCommand(Command):
@@ -215,6 +219,9 @@ class AlfredoCommand(Command):
 
         sys.stderr.write("                              \r")
         return response
+
+    def get_initial_target(self):
+        raise NotImplementedError()
 
     def get_target(self):
         target = self.get_initial_target()
@@ -335,7 +342,7 @@ class CLI(object):
                     if not sys.argv[0].endswith('alfredo'):
                         raise
                     with open('.alfredo-errors.log', 'a') as f:
-                        f.write("ERROR {0}\n{1!r}\n{1!s}\n".format(datetime.datetime.utcnow(), e))
+                        f.write("ERROR {0}\n{1!r}-{1!s}\n{1!s}\n".format(datetime.datetime.utcnow(), e, sys.exc_info()))
                     sys.stderr.write("Unknown error              \n")
                     exit(CLI.UNKNOWN_ERROR)
 
@@ -358,6 +365,7 @@ class CLI(object):
 def main():
     sys.excepthook = CLI.cleanup
     CLI.run(__doc__, alfredo.__version__)
+
 
 if __name__ == '__main__':
     main()

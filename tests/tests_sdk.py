@@ -54,14 +54,3 @@ class HttpTest(TestCase):
         self.assertEqual(len(files), 0)
         self.assertFalse(bool(files))
         self.assertTrue(files.ok)
-
-        # uploaded_file = tempfile.NamedTemporaryFile()
-        # file_created = self.ruote.files.create(name=uuid.uuid4(), file=uploaded_file.name)
-        # self.assertTrue(bool(file_created))
-        # self.assertTrue(file_created.ok)
-        # self.assertEqual(file_created.name, uploaded_file.name.split('/')[-1])
-
-        # file_error = self.ruote.files.create(name=uuid.uuid4(), file=uuid.uuid4())
-        # self.assertTrue(bool(file_error))
-        # self.assertFalse(file_error.ok)
-        # self.assertEqual(file_created.name, uploaded_file.name.split('/')[-1])

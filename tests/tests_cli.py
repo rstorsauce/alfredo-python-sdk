@@ -1,12 +1,11 @@
 import sys
 from unittest.case import TestCase
 
-from alfredo.cli import CLI
-from tests import use_mock_http, mock_http
-
 import ruamel.yaml as yaml
 
 from alfredo import cli
+from alfredo.cli import CLI
+from tests import use_mock_http, mock_http
 
 try:
     from StringIO import StringIO
@@ -26,7 +25,6 @@ class CLIRuntimeError(RuntimeError):
 
 
 class AlfredoCLITest(TestCase):
-
     @classmethod
     def fake_exit(cls, exit_code):
         cls.exit_code = exit_code
@@ -46,7 +44,6 @@ class AlfredoCLITest(TestCase):
         sys.stderr = self.sys_stderr_backup
 
     def sh(self, *args):
-        print(args)
         self.mock_std_streams()
 
         try:
@@ -69,6 +66,12 @@ class AlfredoCLITest(TestCase):
     @use_mock_http
     def test_cli_can_navigate_through_the_endpoints(self):
         mock_http()
+
+        self.sh("login", "-i", "{email: alice@example.com, password: password}")
+        self.sh("logout")
+
+        with self.assertRaisesRegexp(CLIRuntimeError, str(CLI.INPUT_ERROR)):
+            self.sh("logout")
 
         user = self.sh("ruote", "users", "me")
         self.assertEqual(user['first_name'], 'Bob')
@@ -109,10 +112,7 @@ class AlfredoCLITest(TestCase):
         mock_http()
 
         stdout = self.sh("ruote", "jobs", "id:1", "stdout")
-        self.assertEqual(stdout, "hello")
-
-    def t(self, *args, **kwargs):
-        pass
+        self.assertEqual(stdout, 'hello')
 
     @use_mock_http
     def test_cli_can_manage_different_errors(self):
