@@ -9,6 +9,7 @@
 .v2
 .v3
 build/
+cover/
 dist/
 alfredo_python.egg-info/
 alfredo_py.egg-info/
