@@ -157,7 +157,7 @@ class HttpTextPlainResponse(HttpResponse):
     def stream(self, target=sys.stdout):
         try:
             for line in self._http_response.iter_lines(chunk_size=1):
-                target.write(line)
+                target.write(line.decode("utf-8"))
                 target.write('\n')
         except KeyboardInterrupt:
             target.write(self.truncated_warning)

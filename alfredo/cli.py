@@ -111,7 +111,8 @@ import re
 import sys
 
 import ruamel.yaml as yaml
-from docopt import docopt
+from docopt import docopt, DocoptExit
+from requests.exceptions import ConnectionError
 from ruamel.yaml.parser import ParserError
 
 import alfredo
@@ -154,10 +155,14 @@ class Command(object):
     @staticmethod
     def input_from(input_str):
         try:
-            return yaml.safe_load(input_str) or {}
+            input_value = yaml.safe_load(input_str)
+            if not isinstance(input_value, dict):
+                sys.stderr.write("Parser error: Expected dict.\n")
+                exit(CLI.INPUT_ERROR)
+            return input_value or {}
         except ParserError as e:
-            sys.stderr.write("Parser error {0}\n".format(e))
-            raise SystemExit(1)
+            sys.stderr.write("Parser error: {0}\n".format(e))
+            exit(CLI.INPUT_ERROR)
 
     def run(self):
         raise NotImplementedError()
@@ -224,7 +229,8 @@ class AlfredoCommand(Command):
                 else:
                     target = getattr(target, p)
             except AttributeError:
-                sys.stderr.write("Unknown path        \n")
+                sys.stderr.write("                    \r")
+                sys.stderr.write("Unknown path {path!r}\n".format(path='/'.join(self._arguments['<path>'])))
                 exit(1)
         return target
 
@@ -285,6 +291,15 @@ class VirgoCommand(AlfredoCommand):
 
 
 class CLI(object):
+
+    SUCCESS = 0
+    UNKNOWN_ERROR = 1
+    COMMAND_LINE_ERROR = 2
+    INPUT_ERROR = 3
+    HTTP_UPSTREAM_CLIENT_ERROR = 4
+    HTTP_UPSTREAM_SERVER_ERROR = 5
+    CONNECTION_ERROR = 6
+
     commands = {
         'login': LoginCommand,
         'logout': LogoutCommand,
@@ -294,7 +309,12 @@ class CLI(object):
 
     @staticmethod
     def run(doc, version):
-        arguments = docopt(doc=doc, version=version)
+        try:
+            arguments = docopt(doc=doc, version=version)
+        except DocoptExit as e:
+            sys.stderr.write(str(e))
+            sys.stderr.write('\n')
+            exit(CLI.COMMAND_LINE_ERROR)
 
         for command_name in CLI.commands.keys():
             if arguments[command_name]:
@@ -303,15 +323,21 @@ class CLI(object):
                     if sys.argv[0].endswith('alfredo'):
                         CLI.cleanup()
                     exit(exit_code)
+                except ConnectionError as e:
+                    sys.stderr.write(str(e))
+                    sys.stderr.write('\n')
+                    exit(CLI.CONNECTION_ERROR)
                 except IOError as e:
                     sys.stderr.write(str(e))
                     sys.stderr.write('\n')
-                    exit(e.errno)
+                    exit(e.errno or CLI.UNKNOWN_ERROR)
                 except Exception as e:
+                    if not sys.argv[0].endswith('alfredo'):
+                        raise
                     with open('.alfredo-errors.log', 'a') as f:
                         f.write("ERROR {0}\n{1!r}\n{1!s}\n".format(datetime.datetime.utcnow(), e))
                     sys.stderr.write("Unknown error              \n")
-                    exit(1)
+                    exit(CLI.UNKNOWN_ERROR)
 
     @staticmethod
     def cleanup(*args):
