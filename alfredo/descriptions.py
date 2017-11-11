@@ -25,10 +25,19 @@ ruote = {
             'stdout': {},
             'stderr': {},
             'log': {},
+            'perf': {},
+            'telemetry': {},
+        }
+    },
+    'jobs-by-uuid': {
+        ':uuid': {
+            'query': {},
         }
     },
     'apps': {
-        ':id': {}
+        ':id': {
+            'ranking': {},
+        }
     }
 }
 virgo = {
