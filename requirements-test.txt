@@ -1,3 +1,6 @@
+responses
+
 nose
+rednose
 coverage
 coveralls
