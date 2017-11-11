@@ -8,10 +8,8 @@ python:
 install:
 - pip install -r requirements.txt
 - pip install -r requirements-test.txt
-env:
-- RUOTE_ROOT=https://preapi.teamjamon.com
 script:
-- nosetests --with-coverage --cover-package=alfredo --stop
+- ./run_tests.sh
 after_success:
 - coveralls
 deploy:
@@ -21,6 +19,6 @@ deploy:
     secure: KtJo1mA5/JzOyaNlkvelrIZQkI1sMInV33zAExXlWuRqAvzK5c9l3DdouTMI3AjgGq1F3/wRbWG4AKzQojJ9P96nHOuNVBmSFj9p4mL/CVn8W+rlQ8TXht8skrRnfMhL3vg85h4Wds2fMxLYQPZ49KZzK0tsQwBjDXZ9IxABEoriJGeAorh2EokGsHFiLZn+k9p9F4WFov1NVWiaoUvSOAsgavxoFNIRYTftd9tPQ7eBSbsfUX41AUaucPH7qvZvWt9jZm4lksMbtJ84/cjI0+Gm8MaRdgWaHSBB9k76Y2RODqOiUP7JSPnERHPXjqRMUEa1jvVcRgehZqb2e8pteGUURToLq0jkB364gX3n0IGIwjDUAdQ5UkLkRKo12+2AgswrXCMj18S1Io6+r75Fltnyc0dN+NqWMLjvwHB0ggDeKaTcxbCcapDfqraVWY08Ywgs+hBqvNuWTJ80q8xYkoBqqEGYWInTkdhWP8EfZdHO+/u760+R41sFfk40r9ExbfCKqiCci9bEwM9rqgEyQDJUHnksLHhGaaVgO8ke4taMBvX4ePOTYUCSMIjgR4vTaCuRkHd4Tfd5efmTEwBdXsMfufwUc02Fm/1UgnVmblcsajyAcUha/PwDodilCaledXkZ4BzEC01vtmiXpi7UDLuSAmnvUq673UVVgeknAL4=
   distributions: bdist_wheel
   on:
-    python: 3.6
+    python: '3.6'
     repo: rstorsauce/alfredo-python-sdk
     branch: develop
