@@ -18,7 +18,7 @@ if sys.version_info < (3,):
 
 
 def ruote(token=None):
-    ruote_root = os.getenv('RUOTE_ROOT', 'https://api.teamjamon.com')
+    ruote_root = os.getenv('RUOTE_ROOT', 'https://beta.rstor.io')
     root = HttpPropertyResource(None, ruote_root, descriptions.ruote)
     if token is not None:
         root.headers = dict(Authorization="Token %s" % token)
