@@ -101,6 +101,10 @@ class HttpResponse(HttpPropertyResource):
         self._ok = True
 
     @property
+    def reason(self):
+        return self._reason
+
+    @property
     def status(self):
         return self._status
 
@@ -140,11 +144,11 @@ class HttpSingleResponse(HttpResponse):
     def __init__(self, resource, http_response):
         super(HttpSingleResponse, self).__init__(resource, http_response.status_code, http_response.reason, {})
 
-        if self._status != 204:
+        if self.status != 204:
             try:
                 self._result = http_response.json()
             except ValueError:
-                self._result = {'detail': 'Server error'}
+                self._result = {self.status: self.reason}
                 self._ok = False
 
 
