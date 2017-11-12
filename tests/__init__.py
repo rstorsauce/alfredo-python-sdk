@@ -26,7 +26,9 @@ def basic_response(status, body):
     return response
 
 
-def mock_http_uri(method, url, callback=None, result=None, status=200, text=None):
+def mock_http_uri(method, path, callback=None, result=None, status=200, text=None):
+    url = "{base!s}{path!s}".format(base='https://apibeta.rstor.io', path=path)
+
     content_type = 'application/json'
     if result:
         callback = basic_response(status, json.dumps(result))
@@ -44,15 +46,15 @@ def use_mock_http(f, *args, **kwargs):
 
 
 def mock_http():
-    mock_http_uri(POST, 'https://beta.rstor.io/sso/token-by-email/', result={'token': 'faketoken'})
-    mock_http_uri(GET, 'https://beta.rstor.io/users/me/', result={'first_name': 'Bob'})
-    mock_http_uri(PUT, 'https://beta.rstor.io/users/me/', callback=echo)
-    mock_http_uri(PATCH, 'https://beta.rstor.io/users/me/', callback=echo)
-    mock_http_uri(POST, 'https://beta.rstor.io/apps/', callback=echo)
-    mock_http_uri(GET, 'https://beta.rstor.io/apps/', result={'count': 1, 'results': [{'id': 1, 'name': 'Octave'}]})
-    mock_http_uri(GET, 'https://beta.rstor.io/apps/1/', result={'name': 'Octave'})
-    mock_http_uri(DELETE, 'https://beta.rstor.io/apps/1/', status=204)
-    mock_http_uri(GET, 'https://beta.rstor.io/files/', result={'count': 0, 'results': []})
-    mock_http_uri(GET, 'https://beta.rstor.io/jobs/1/stdout/', text='hello')
-    mock_http_uri(GET, 'https://beta.rstor.io/users/', status=404)
-    mock_http_uri(GET, 'https://beta.rstor.io/jobs/', status=500)
+    mock_http_uri(POST, '/sso/token-by-email/', result={'token': 'faketoken'})
+    mock_http_uri(GET, '/users/me/', result={'first_name': 'Bob'})
+    mock_http_uri(PUT, '/users/me/', callback=echo)
+    mock_http_uri(PATCH, '/users/me/', callback=echo)
+    mock_http_uri(POST, '/apps/', callback=echo)
+    mock_http_uri(GET, '/apps/', result={'count': 1, 'results': [{'id': 1, 'name': 'Octave'}]})
+    mock_http_uri(GET, '/apps/1/', result={'name': 'Octave'})
+    mock_http_uri(DELETE, '/apps/1/', status=204)
+    mock_http_uri(GET, '/files/', result={'count': 0, 'results': []})
+    mock_http_uri(GET, '/jobs/1/stdout/', text='hello')
+    mock_http_uri(GET, '/users/', status=404)
+    mock_http_uri(GET, '/jobs/', status=500)
