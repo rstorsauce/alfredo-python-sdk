@@ -342,7 +342,7 @@ class CLI(object):
                     if not sys.argv[0].endswith('alfredo'):
                         raise
                     with open('.alfredo-errors.log', 'a') as f:
-                        f.write("ERROR {0}\n{1!r}-{1!s}\n{1!s}\n".format(datetime.datetime.utcnow(), e, sys.exc_info()))
+                        f.write("ERROR {0}\n{1!r}-{1!s}\n{2!r}\n".format(datetime.datetime.utcnow(), e, sys.exc_info()[2]))
                     sys.stderr.write("Unknown error              \n")
                     exit(CLI.UNKNOWN_ERROR)
 

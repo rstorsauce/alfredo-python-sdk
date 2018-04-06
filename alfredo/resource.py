@@ -1,6 +1,7 @@
-import datetime
-import ruamel.yaml as yaml
 import sys
+import tempfile
+
+import ruamel.yaml as yaml
 
 from alfredo.http import HttpService
 from alfredo.mixins.lazy import LazyMixin
@@ -61,6 +62,9 @@ class HttpResource(NestedMixin, LazyMixin):
 
             elif content_type == 'text/plain':
                 return HttpTextPlainResponse(self, http_response)
+
+            elif content_type == 'application/tar':
+                return HttpBinaryResponse(self, http_response)
 
             else:
                 raise HttpResource.Exception("Unknown content-type {}".format(content_type))
@@ -150,6 +154,28 @@ class HttpSingleResponse(HttpResponse):
             except ValueError:
                 self._result = {self.status: self.reason}
                 self._ok = False
+
+
+class HttpBinaryResponse(HttpResponse):
+    def __init__(self, resource, http_response):
+        super(HttpBinaryResponse, self).__init__(resource, http_response.status_code, http_response.reason, '')
+        self._http_response = http_response
+
+    def stream(self, target=sys.stdout):
+        try:
+            for chunk in self._http_response.iter_content(chunk_size=128):
+                target.write(chunk)
+        except KeyboardInterrupt:
+            pass
+
+    def __str__(self):
+        content = tempfile.NamedTemporaryFile(suffix='.tar', delete=False)
+
+        with open(content.name, 'wb') as f:
+            for chunk in self._http_response.iter_content(chunk_size=128):
+                f.write(chunk)
+
+        return 'Saved as %s\n' % content.name
 
 
 class HttpTextPlainResponse(HttpResponse):

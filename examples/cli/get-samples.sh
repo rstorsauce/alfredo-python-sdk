@@ -11,23 +11,23 @@ function debug() {
 	echo `TZ=utc LANG=C date` $* >&2
 }
 
-export JOB_CORES=4
-export JOB_TIME=150
-export CPU_STRESS='md5sum /dev/zero'
+export JOB_CORES=1
+export JOB_TIME=60
+export CPU_STRESS='md5sum /dev/zero ; printenv'
 
 export RUOTE_ROOT='https://apitest.rstor.io'
 # export RUOTE_ROOT='https://a9ba69a2.ngrok.io'
 # export RUOTE_ROOT='http://localhost:8000'
 
-SLEEP_BETWEEN_APPS=20
-SLEEP_WAIT_FINISH=15
-SLEEP_WAIT_PERF=10
+SLEEP_BETWEEN_APPS=60
+SLEEP_WAIT_FINISH=35
+SLEEP_WAIT_PERF=20
 
 debug "Checking tools"
 jq --version   >/dev/null 2>&1
 yq --version   >/dev/null 2>&1
 alfredo -help  >/dev/null 2>&1
-uniqueid=`date -u +%s.%N`
+uniqueid=.`date -u +%s.%N`
 
 alfredo login < logindata.txt
 
@@ -41,21 +41,25 @@ mkdir -p perf
 mkdir -p telemetry
 
 function get_queues() {
-	alfredo ruote queues
+	alfredo ruote queues -o id,name
 }
 
 function get_queue_by_id() {
 	debug "Retrieving information of queue $1"
-	alfredo ruote queues id:$1
+	alfredo ruote queues id:$1 -o id,name
 }
 
 function get_apps() {
-	alfredo ruote apps
+	# alfredo ruote apps -o id,name
+	cat <<EOF
+- id: 301
+  name: Amber
+EOF
 }
 
 function get_app_by_id() {
 	debug "Retrieving information of app $1"
-	alfredo ruote apps id:$1
+	alfredo ruote apps id:$1 -o id,name
 }
 
 function get_job_by_id() {
@@ -76,9 +80,9 @@ function job() {
 	cat<<EOF
 app: $1
 queue: $2
-name: $1-$2-`date -u +%y%m%d%H%M%S`
+name: rober-perf-a$1-q$2-`date -u +%y%m%d%H%M%S`
 run_script: timeout $JOB_TIME $CPU_STRESS ; printenv
-time_seconds: `expr $JOB_TIME + 60`
+expected_runtime: `expr $JOB_TIME + 120`
 num_cores: $JOB_CORES
 EOF
 }
@@ -100,9 +104,10 @@ function main() {
 		get_app_by_id $app_id > apps/$app_id.yml
 		for queue_id in $queue_ids
 		do
-			debug Launching app `yq .name apps/$app_id.yml` in queue `yq .name queues/$queue_id.yml` of cluster `yq .cluster.name queues/$queue_id.yml`
+			debug "Launching app `yq .name apps/$app_id.yml` in queue `yq .name queues/$queue_id.yml`" # of cluster `yq .cluster.name queues/$queue_id.yml`
 			(
-				( job $app_id $queue_id | alfredo ruote jobs -C > jobs/creation.yml ) || exit $?
+				job $app_id $queue_id > jobs/input-$app_id-$queue_id.yml
+				( cat jobs/input-$app_id-$queue_id.yml | alfredo ruote jobs -C > jobs/creation.yml ) || exit $?
 				job_id=`yq .id jobs/creation.yml`
 				mv jobs/creation.yml jobs/$job_id.yml
 				echo $job_id >> $uniqueid.jobs
@@ -129,11 +134,15 @@ function main() {
 				then
 					echo $job_id >> $uniqueid.finished
 				fi
+				if [[ "$status" == @(Completed) ]]
+				then
+					echo $job_id >> $uniqueid.completed
+				fi
 			fi
 		done
 	done
 
-	for job_id in `cat $uniqueid.finished`
+	for job_id in `cat $uniqueid.completed`
 	do
 		getperf="alfredo ruote jobs id:$job_id perf"
 		perffile="perf/perf-$job_id.tar"
