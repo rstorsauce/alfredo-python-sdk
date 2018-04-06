@@ -6,7 +6,7 @@ import ruamel.yaml as yaml
 from alfredo import descriptions
 from alfredo.resource import HttpPropertyResource
 
-__version__ = '0.0.3'
+__version__ = '0.0.3-laurel'
 
 
 def represent_unicode(self, data):
